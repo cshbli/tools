@@ -21,7 +21,7 @@ def main(args):
             graph_def.ParseFromString(f.read())
             tf.import_graph_def(graph_def)
     elif args.model_path.endswith('.meta'):
-        tf.train.import_meta_graph("your-meta-graph-file.meta")
+        tf.train.import_meta_graph(args.model_path)
 
     FileWriter(args.logdir, sess.graph)
     print("Model Imported. Visualize by running: tensorboard --logdir=" + args.logdir)
