@@ -19,7 +19,8 @@ def main(args):
         with tf.io.gfile.GFile(args.model_path, "rb") as f:
             graph_def = graph_pb2.GraphDef()
             graph_def.ParseFromString(f.read())
-            tf.import_graph_def(graph_def)
+            # Set name='', otherwise, the default 'import' will be applied
+            tf.import_graph_def(graph_def, name='')
     elif args.model_path.endswith('.meta'):
         tf.train.import_meta_graph(args.model_path)
 
