@@ -34,7 +34,8 @@ def load_graph(model_file):
   with open(model_file, "rb") as f:
     graph_def.ParseFromString(f.read())
   with graph.as_default():
-    tf.import_graph_def(graph_def)
+    # set name="", otherwise the default "input" will be insert as the scope
+    tf.import_graph_def(graph_def, name="")
 
   return graph
 
@@ -140,8 +141,10 @@ if __name__ == "__main__":
       input_mean=input_mean,
       input_std=input_std)
 
-  input_name = "import/" + input_layer
-  output_name = "import/" + output_layer
+#   input_name = "import/" + input_layer
+#   output_name = "import/" + output_layer
+  input_name = input_layer
+  output_name = output_layer
   input_operation = graph.get_operation_by_name(input_name)
   output_operation = graph.get_operation_by_name(output_name)
 
