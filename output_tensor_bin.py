@@ -1,8 +1,10 @@
+import os
 import argparse
 import numpy as np
 from PIL import Image
 import tensorflow as tf
 
+from utils import makedirs
 from utils import load_graph
 from utils import preprocess_image
 from utils import extract_features
@@ -19,15 +21,18 @@ def parse_args():
     parser.add_argument('--image_format',   type=str, default="RGB", help="The image channel format RGB or BGR")
     parser.add_argument('--image_mean',     type=str, default="123.68,116.78,103.94", help="The image channel means")
     parser.add_argument('--image_std',      type=str, default="1.0,1.0,1.0", help="The image channel stds")
-    parser.add_argument('--output_node',    type=str, help='output node name')
+    parser.add_argument('--output_nodes',   type=str, help='output node names')
     parser.add_argument('--input_image',    type=str, help="The input image path")
 
-    parser.add_argument('--output_bin_file',type=str, default="output_ts.bin", help="The output binary file name")
+    parser.add_argument('--output_bin_suffix',  type=str, default='', help='The suffix append to output node name for output bin file name')
+    parser.add_argument('--output_bin_path',    type=str, default="./bins", help="The output binary directory name")
 
     return parser.parse_args()
 
 
 def main(args):
+    makedirs(args.output_bin_path)
+
     # load the model
     inference_graph = None
     if args.model.endswith('.pb'): 
@@ -58,20 +63,25 @@ def main(args):
     # Preprocess the input image based on normalization parameters
     img_input = preprocess_image(img_resize, args.image_scale, img_means, img_stds)
 
+    output_layers = args.output_nodes.split(',')
+
     # Extract the features
     if inference_graph != None:
-        feature_dicts = extract_features(inference_graph, img_input, args.input_node, [args.output_node])
+        feature_dicts = extract_features(inference_graph, img_input, args.input_node, output_layers)
     else:
-        feature_dicts = extract_features_checkpoint_model(args.model, img_input, args.input_node, [args.output_node])
+        feature_dicts = extract_features_checkpoint_model(args.model, img_input, args.input_node, output_layers)
     
-    for i in feature_dicts:
-        print(i)
-        features = feature_dicts[i]
+    for tensor_name in feature_dicts:
+        print(tensor_name)
+        features = feature_dicts[tensor_name]
         print(np.shape(features))
                 
         feature_1d = features[0].flatten().tobytes()
+
+        output_bin_filename = (tensor_name.split(':0')[0]).replace('/', '_') + args.output_bin_suffix + '.bin'
+        output_bin_filename = os.path.join(args.output_bin_path, output_bin_filename)
         
-        with open(args.output_bin_file, 'wb') as output:
+        with open(output_bin_filename, 'wb') as output:
             output.write(feature_1d)
 
 

@@ -1,5 +1,17 @@
+import os
 import numpy as np
 import tensorflow as tf
+
+def makedirs(path):
+    # Intended behavior: try to create the directory,
+    # pass if the directory exists already, fails otherwise.
+    # Meant for Python 2.7/3.n compatibility.
+    try:
+        os.makedirs(path)
+    except OSError:
+        if not os.path.isdir(path):
+            raise
+
 
 def save_to_json(model, filename):
     import google.protobuf.json_format as json_format
