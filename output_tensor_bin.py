@@ -75,14 +75,17 @@ def main(args):
         print(tensor_name)
         features = feature_dicts[tensor_name]
         print(np.shape(features))
-                
-        feature_1d = features[0].flatten().tobytes()
 
-        output_bin_filename = (tensor_name.split(':0')[0]).replace('/', '_') + args.output_bin_suffix + '.bin'
-        output_bin_filename = os.path.join(args.output_bin_path, output_bin_filename)
-        
-        with open(output_bin_filename, 'wb') as output:
-            output.write(feature_1d)
+        if np.isscalar(features):
+            print(features)
+        else: 
+            feature_1d = features[0].flatten().tobytes()
+
+            output_bin_filename = (tensor_name.split(':0')[0]).replace('/', '_') + args.output_bin_suffix + '.bin'
+            output_bin_filename = os.path.join(args.output_bin_path, output_bin_filename)
+            
+            with open(output_bin_filename, 'wb') as output:
+                output.write(feature_1d)
 
 
 if __name__ == "__main__":

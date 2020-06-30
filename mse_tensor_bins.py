@@ -28,7 +28,9 @@ def main(args):
     bin2 = bin2 * scale
 
     mse = np.square(np.subtract(bin1, bin2)).mean()
-    maxi = np.amax(bin2)
+    maxi = np.max(bin2)
+    # mini = np.min(bin2)
+    # print("maxi: {}, mini: {}".format(maxi, mini))
     psnr = 10*math.log10((maxi**2)/mse)
     print('MSE: {:.4f}, PSNR: {:.4f}'.format(mse, psnr))
 
