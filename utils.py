@@ -111,7 +111,8 @@ def preprocess_image(x, scale, img_mean, img_std):
     # covert to float32
     x = x.astype(np.float32)
 
-    for i in range(3):        
+    img_channels = len(img_mean)
+    for i in range(img_channels):
         x[..., i]= (x[..., i]/scale - img_mean[i])/img_std[i]
     
     return x

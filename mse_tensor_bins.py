@@ -16,7 +16,7 @@ def main(args):
     print(np.shape(bin1))
     vmin = np.min(bin1)
     vmax = np.max(bin1)
-    print('Data ranage min: {} and max: {}'.format(vmin, vmax))
+    print('Data range min: {} and max: {}'.format(vmin, vmax))
     scale = 127.0/max(np.absolute(vmax), np.absolute(vmin))
     #scale = 1.0
     print('Scale: {}'.format(scale))

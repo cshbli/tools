@@ -38,27 +38,35 @@ def main(args):
     if args.model.endswith('.pb'): 
         inference_graph = load_graph(args.model)
 
-    # load input image and resize to the graph input
-    pil_image = Image.open(args.input_image)
-    img_resize = pil_image.resize((args.image_width, args.image_height))
-    img_resize = np.array(img_resize)
-
-    # Change the PIL loaded input image to BGR format
-    if (args.image_format == "BGR"):
-        img_resize = np.transpose(img_resize, [2, 0, 1])
-
     # normalize the image input
+    img_channels = 3
     img_mean_strs = args.image_mean.split(',')
     img_means = []
     if len(img_mean_strs) == 3:
-        for i in range(3):
-            img_means.append(float(img_mean_strs[i]))    
+        img_channels = 3
+    elif len(img_mean_strs) == 1:
+        img_channels = 1
+    for i in range(img_channels):
+        img_means.append(float(img_mean_strs[i]))
 
     img_std_strs = args.image_std.split(',')
-    img_stds = []
-    if len(img_std_strs) == 3:
-        for i in range(3):
-            img_stds.append(float(img_std_strs[i]))    
+    img_stds = []    
+    for i in range(img_channels):
+        img_stds.append(float(img_std_strs[i]))
+
+    # load input image and resize to the graph input
+    if img_channels == 3:
+        pil_image = Image.open(args.input_image)
+    elif img_channels == 1:
+        pil_image = Image.open(args.input_image).convert('L')
+    img_resize = pil_image.resize((args.image_width, args.image_height))
+    img_resize = np.array(img_resize)
+    if img_channels == 1:
+        img_resize = np.expand_dims(img_resize, 2)    
+
+    # Change the PIL loaded input image to BGR format
+    if img_channels == 3 and args.image_format == "BGR":
+        img_resize = np.transpose(img_resize, [2, 0, 1])    
     
     # Preprocess the input image based on normalization parameters
     img_input = preprocess_image(img_resize, args.image_scale, img_means, img_stds)
