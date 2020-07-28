@@ -16,7 +16,7 @@ def main(args):
     print(np.shape(bin1))
     vmin = np.min(bin1)
     vmax = np.max(bin1)
-    print('Data range min: {} and max: {}'.format(vmin, vmax))
+    print('bin1 data range min: {} and max: {}'.format(vmin, vmax))
     scale = 127.0/max(np.absolute(vmax), np.absolute(vmin))
     #scale = 1.0
     print('Scale: {}'.format(scale))
@@ -24,7 +24,10 @@ def main(args):
     bin1 = bin1 * scale
     # Normalize the bin2
     bin2 = np.fromfile(args.bin2, dtype="float32")
+    vmin = np.min(bin2)
+    vmax = np.max(bin2)    
     print(np.shape(bin2))
+    print('bin2 data range min: {} and max: {}'.format(vmin, vmax))
     bin2 = bin2 * scale
 
     mse = np.square(np.subtract(bin1, bin2)).mean()
