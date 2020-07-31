@@ -10,6 +10,9 @@ try:
 except ImportError:
   import Queue as queue
 
+# Global variable to make sure the inserted Identity Conv name is not duplicated
+identity_conv_names_used = []  
+
 def parse_args():
     parser = argparse.ArgumentParser(description = 'Insert identity Conv nodes for quantization')
     
@@ -94,7 +97,12 @@ def _insert_identity_conv(in_edge_op, op):
     # Construct a Identity Convolution Weight
     identity_matrix = np.identity(input_tensor_channels).astype(np.float32)
     weight_matrix = np.reshape(identity_matrix, (1, 1, input_tensor_channels, input_tensor_channels))
-    name_prefix = _AddContextToName(context, "IdentityConv")
+    name_prefix = _AddContextToName(context, "IdentityConv/Conv2D")
+    i = 1
+    while name_prefix in identity_conv_names_used:
+        name_prefix = _AddContextToName(context, "IdentityConv_" + str(i) + "/Conv2D")
+        i = i + 1
+    identity_conv_names_used.append(name_prefix)    
     # For frozen graph, we have to use tf.constant
     w = tf.constant(weight_matrix, name=name_prefix + "_weight")    
 
@@ -232,7 +240,7 @@ if __name__ == '__main__':
             print("add_op.name: {}".format(add_op.name))            
             for in_edge in add_op.inputs:
                 if in_edge.op.type == "AddV2" or in_edge.op.type == "Add":
-                    _insert_identity_conv(in_edge.op, add_op)                    
+                    _insert_identity_conv(in_edge.op, add_op)
 
         # insert Indentity Conv for each Concat input
         for concat_op in [op for op in graph.get_operations()
