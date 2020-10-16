@@ -34,12 +34,10 @@ python output_tensor_bin.py \
   --input_node=Placeholder \
   --image_width=512 \
   --image_height=512 \
-  --image_scale=255.0 \
-  --image_mean="0.408, 0.447, 0.470" \
-  --image_std="0.289, 0.274, 0.278" \
+  --image_mean="0.0,0.0,0.0" \
   --output_node="hm/conv2d_1/Conv2D/bias" \
-  --input_image=./calibration/000000022371.jpg \
-  --output_bin_file=quantized_output_ts.bin
+  --output_bin_path="bst_quant/bins_22371" \
+  --input_image=./calibration/000000022371.jpg
 ```
 
 - For check point model, the "--model" will be the checkpoint model path, the meta graph is named as "model.ckpt.meta"
@@ -50,10 +48,8 @@ python /data/Projects/tools/output_tensor_bin.py \
   --input_node=Placeholder \
   --image_width=512 \
   --image_height=512 \
-  --image_scale=255.0 \
-  --image_mean="0.408, 0.447, 0.470" \
-  --image_std="0.289, 0.274, 0.278" \
+  --image_mean="0.0,0.0,0.0" \  
   --output_node="hm/conv2d_1/Conv2D/bias" \
-  --input_image=./calibration/000000022371.jpg \
-  --output_bin_file=checkpoint_output_ts.bin
+  --output_bin_path="bst_quant/bins_22371" \
+  --input_image=./calibration/000000022371.jpg
 ```

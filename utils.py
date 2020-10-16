@@ -102,8 +102,24 @@ def preprocess_image(x, image_format='RGB', mode='caffe'):
     return x
 
 
-def preprocess_image(x, scale, img_mean, img_std):
-    """ Preprocess an image by dividing (img / scale - mean) / std
+# def preprocess_image(x, scale, img_mean, img_std):
+#     """ Preprocess an image by dividing (img / scale - mean) / std
+    
+#     Returns
+#         The normalized image
+#     """
+#     # covert to float32
+#     x = x.astype(np.float32)
+
+#     img_channels = len(img_mean)
+#     for i in range(img_channels):
+#         x[..., i]= (x[..., i]/scale - img_mean[i])/img_std[i]
+    
+#     return x
+
+
+def preprocess_image(x, img_means, img_scales):
+    """ Preprocess an image by (img - means) / scales
     
     Returns
         The normalized image
@@ -111,11 +127,11 @@ def preprocess_image(x, scale, img_mean, img_std):
     # covert to float32
     x = x.astype(np.float32)
 
-    img_channels = len(img_mean)
+    img_channels = len(img_means)
     for i in range(img_channels):
-        x[..., i]= (x[..., i]/scale - img_mean[i])/img_std[i]
+        x[..., i]= (x[..., i] - img_means[i])/img_scales[i]
     
-    return x
+    return x    
 
 
 def extract_features(inference_graph, input_image, input_layer, output_layers):

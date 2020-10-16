@@ -16,11 +16,10 @@ def parse_args():
     parser.add_argument('--model',          type=str, help="The inference model path")
     parser.add_argument('--input_node',     type=str, help='The input node name')
     parser.add_argument('--image_width',    type=int, help="The input image width")
-    parser.add_argument('--image_height',   type=int, help="The input image height")
-    parser.add_argument('--image_scale',    type=float, default=1.0, help="The normalization scale")
+    parser.add_argument('--image_height',   type=int, help="The input image height")    
     parser.add_argument('--image_format',   type=str, default="RGB", help="The image channel format RGB or BGR")
     parser.add_argument('--image_mean',     type=str, default="123.68,116.78,103.94", help="The image channel means")
-    parser.add_argument('--image_std',      type=str, default="1.0,1.0,1.0", help="The image channel stds")
+    parser.add_argument('--image_scale',    type=str, default="1.0,1.0,1.0", help="The image channel scales")
     parser.add_argument('--output_nodes',   type=str, help='output node names')
     parser.add_argument('--input_image',    type=str, help="The input image path")
 
@@ -49,10 +48,14 @@ def main(args):
     for i in range(img_channels):
         img_means.append(float(img_mean_strs[i]))
 
-    img_std_strs = args.image_std.split(',')
-    img_stds = []    
+    # img_std_strs = args.image_std.split(',')
+    # img_stds = []    
+    # for i in range(img_channels):
+    #     img_stds.append(float(img_std_strs[i]))
+    img_scale_strs = args.image_scale.split(',')
+    img_scales = []
     for i in range(img_channels):
-        img_stds.append(float(img_std_strs[i]))
+        img_scales.append(float(img_scale_strs[i]))
 
     # load input image and resize to the graph input
     if img_channels == 3:
@@ -69,7 +72,8 @@ def main(args):
         img_resize = np.transpose(img_resize, [2, 0, 1])    
     
     # Preprocess the input image based on normalization parameters
-    img_input = preprocess_image(img_resize, args.image_scale, img_means, img_stds)
+    # img_input = preprocess_image(img_resize, args.image_scale, img_means, img_stds)
+    img_input = preprocess_image(img_resize, img_means, img_scales)
 
     output_layers = args.output_nodes.split(',')
 
