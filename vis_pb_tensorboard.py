@@ -19,6 +19,20 @@ def main(args):
         with tf.io.gfile.GFile(args.model_path, "rb") as f:
             graph_def = graph_pb2.GraphDef()
             graph_def.ParseFromString(f.read())
+
+            # fix nodes
+            # https://github.com/onnx/tensorflow-onnx/issues/77
+            # import frozen graph with error "Input 0 of node X was passed float from Y:0 incompatible with expected float_ref."
+            for node in graph_def.node:
+                if node.op == 'RefSwitch':
+                    node.op = 'Switch'
+                    for index in range(len(node.input)):
+                        if 'moving_' in node.input[index]:
+                            node.input[index] = node.input[index] + '/read'
+                elif node.op == 'AssignSub':
+                    node.op = 'Sub'
+                    if 'use_locking' in node.attr: del node.attr['use_locking']
+
             # Set name='', otherwise, the default 'import' will be applied
             tf.import_graph_def(graph_def, name='')
     elif args.model_path.endswith('.meta'):
