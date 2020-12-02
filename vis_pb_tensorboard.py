@@ -42,6 +42,31 @@ def main(args):
     print("Model Imported. Visualize by running: tensorboard --logdir=" + args.logdir)
 
 
+def fix_error():
+    gp = tf.get_default_graph().as_graph_def()
+    for node in gp.node:
+        if node.op == 'RefSwitch':
+            node.op = 'Switch'
+            for index in range(len(node.input)):
+                if 'moving_' in node.input[index]:
+                    node.input[index] = node.input[index] + '/read'
+        elif node.op == 'AssignSub':
+            node.op = 'Sub'
+            if 'use_locking' in node.attr: del node.attr['use_locking']
+        elif node.op == 'AssignAdd':
+            node.op = 'Add'
+            if 'use_locking' in node.attr: del node.attr['use_locking']
+        elif node.op == 'Assign':
+            node.op = 'Identity'
+            if 'use_locking' in node.attr: del node.attr['use_locking']
+            if 'validate_shape' in node.attr: del node.attr['validate_shape']
+            if len(node.input) == 2:
+                # input0: ref: Should be from a Variable node. May be uninitialized.
+                # input1: value: The value to be assigned to the variable.
+                node.input[0] = node.input[1]
+                del node.input[1]       
+
+
 if __name__ == "__main__":
     args = parse_args()
     main(args)
