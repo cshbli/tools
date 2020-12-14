@@ -13,6 +13,39 @@ def makedirs(path):
             raise
 
 
+def get_all_files_from_directory(dirname, ext='.DNG'):
+    """ Recursively searching all files with the specified extension under one directory and all its sub-directories
+
+    Args:   
+        dirname:        The directory to be searched
+        ext:            The extension name to be matched
+                        If it is None, then all files will be returned
+
+    Returns:
+        A list of files with "relative" (NOT Absolute path) directory name under the INPUT directory
+    """
+
+    result_list = []
+
+    # list root directory of searching
+    all_file_names = os.listdir(dirname)    
+    for file_name in all_file_names:        
+        full_pathname = os.path.join(dirname, file_name)
+        if os.path.isdir(full_pathname):
+            # Recursively searching sub-directory
+            sub_dir_list = get_all_files_from_directory(full_pathname, ext)
+            for sub_dir_result in sub_dir_list:
+                # Adding relative directory name
+                result_list.append(os.path.join(file_name, sub_dir_result))
+        else:
+            if ext == None:
+                result_list.append(file_name)
+            elif os.path.splitext(file_name)[1] == ext:
+                result_list.append(file_name)
+    
+    return result_list
+
+
 def save_to_json(model, filename):
     import google.protobuf.json_format as json_format
     json_str = json_format.MessageToJson(model, preserving_proto_field_name = True)
@@ -100,22 +133,6 @@ def preprocess_image(x, image_format='RGB', mode='caffe'):
             x[..., 0] -= 103.939        # Blue
 
     return x
-
-
-# def preprocess_image(x, scale, img_mean, img_std):
-#     """ Preprocess an image by dividing (img / scale - mean) / std
-    
-#     Returns
-#         The normalized image
-#     """
-#     # covert to float32
-#     x = x.astype(np.float32)
-
-#     img_channels = len(img_mean)
-#     for i in range(img_channels):
-#         x[..., i]= (x[..., i]/scale - img_mean[i])/img_std[i]
-    
-#     return x
 
 
 def preprocess_image(x, img_means, img_scales):
