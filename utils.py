@@ -93,8 +93,8 @@ def load_graph(frozen_graph_filename):
     """
     graph = tf.Graph()
     with graph.as_default():
-        graph_def = tf.GraphDef()
-        with tf.gfile.GFile(frozen_graph_filename, 'rb') as fid:
+        graph_def = tf.compat.v1.GraphDef()
+        with tf.compat.v1.gfile.GFile(frozen_graph_filename, 'rb') as fid:
             serialized_graph = fid.read()
             graph_def.ParseFromString(serialized_graph)
             tf.import_graph_def(graph_def, name='')
@@ -165,7 +165,7 @@ def extract_features(inference_graph, input_image, input_layer, output_layers):
                         whose value is the corresponding output from that layer
     """
 
-    sess = tf.Session(graph=inference_graph)    
+    sess = tf.compat.v1.Session(graph=inference_graph)    
     tensor_dict = {}
     for output in output_layers:
         tensor_name = output + ":0"
