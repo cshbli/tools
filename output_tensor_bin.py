@@ -57,15 +57,19 @@ def main(args):
     for i in range(img_channels):
         img_scales.append(float(img_scale_strs[i]))
 
-    # load input image and resize to the graph input
-    if img_channels == 3:
-        pil_image = Image.open(args.input_image)
-    elif img_channels == 1:
-        pil_image = Image.open(args.input_image).convert('L')
-    img_resize = pil_image.resize((args.image_width, args.image_height))
-    img_resize = np.array(img_resize)
-    if img_channels == 1:
-        img_resize = np.expand_dims(img_resize, 2)    
+    if args.input_image is not None:
+        # load input image and resize to the graph input
+        if img_channels == 3:
+            pil_image = Image.open(args.input_image)
+        elif img_channels == 1:
+            pil_image = Image.open(args.input_image).convert('L')
+        img_resize = pil_image.resize((args.image_width, args.image_height))
+        img_resize = np.array(img_resize)
+        if img_channels == 1:
+            img_resize = np.expand_dims(img_resize, 2)
+    else:
+        img_resize = np.random.rand(args.image_height, args.image_width, img_channels) * 255
+        img_resize = img_resize.astype('uint8')        
 
     # Change the PIL loaded input image to BGR format
     if img_channels == 3 and args.image_format == "BGR":
@@ -98,6 +102,11 @@ def main(args):
             
             with open(output_bin_filename, 'wb') as output:
                 output.write(feature_1d)
+
+            output_npy_filename = (tensor_name.split(':0')[0]).replace('/', '_') + args.output_bin_suffix + '.npy'
+            output_npy_filename = os.path.join(args.output_bin_path, output_npy_filename)
+            with open(output_npy_filename, 'wb') as f:
+                np.save(f, features[0])
 
 
 if __name__ == "__main__":
